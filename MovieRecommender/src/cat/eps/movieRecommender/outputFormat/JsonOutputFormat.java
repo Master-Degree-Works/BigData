@@ -25,14 +25,16 @@ public class JsonOutputFormat extends FileOutputFormat<LongWritable,JsonWritable
 		}
 		
 		private void writeRecord(String name,String value) throws IOException{
-			out.writeBytes("{\""+name+"\":"+value+"}");
+			out.writeBytes("\""+name+"\":"+value);
 		}
 		
 		public synchronized void write(LongWritable key, JsonWritable value) throws IOException {
-			this.writeRecord("id", key.toString());
-			this.writeRecord("rating", value.getRating().toString());
+			out.writeChars("{\"");
+			this.writeRecord("id", key.toString()+",");
+			this.writeRecord("rating", value.getRating().toString()+",");
 			this.writeRecord("timestamp", value.getTimestamp().toString());
 			//TODO: Add other fields
+			out.writeChars("},");
 		} 
 
 		@Override

@@ -14,27 +14,27 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import cat.eps.movieRecommender.writable.JsonWritable;
 
 
-public class JsonOutputFormat extends FileOutputFormat<LongWritable,JsonWritable> {
+public class JsonOutputFormat extends FileOutputFormat<JsonWritable,LongWritable> {
 
-	protected static class JsonRecordWriter extends RecordWriter<LongWritable, JsonWritable> {
+	protected static class JsonRecordWriter extends RecordWriter<JsonWritable,LongWritable > {
 		private DataOutputStream out;
 
 		public JsonRecordWriter(DataOutputStream out) throws IOException {
 			this.out = out;
 			out.writeBytes("{\"ratings\":[\n");
 		}
-		
+
 		private void writeRecord(String name,String value) throws IOException{
 			out.writeBytes("\""+name+"\":"+value);
 		}
-		
-		public synchronized void write(LongWritable key, JsonWritable value) throws IOException {
-			out.writeChars("{\"");
-			this.writeRecord("id", key.toString()+",");
-			this.writeRecord("rating", value.getRating().toString()+",");
-			this.writeRecord("timestamp", value.getTimestamp().toString());
+
+		public synchronized void write(JsonWritable key, LongWritable value) throws IOException {
+			out.writeBytes("{");
+			this.writeRecord("id", key.getId()+",");
+			this.writeRecord("rating", key.getRating().toString()+",");
+			this.writeRecord("timestamp", key.getTimestamp().toString());
 			//TODO: Add other fields
-			out.writeChars("},");
+			out.writeBytes("},\n");
 		} 
 
 		@Override
@@ -43,11 +43,11 @@ public class JsonOutputFormat extends FileOutputFormat<LongWritable,JsonWritable
 			finally { out.close(); }
 		}
 	}
-	
-	
-	public RecordWriter<LongWritable, JsonWritable> getRecordWriter(TaskAttemptContext job) throws IOException {
+
+
+	public RecordWriter<JsonWritable,LongWritable > getRecordWriter(TaskAttemptContext job) throws IOException {
 		String extension = ".json";
-		  Path file = getDefaultWorkFile(job, extension);
+		Path file = getDefaultWorkFile(job, extension);
 		FileSystem fs = file.getFileSystem(job.getConfiguration());
 		FSDataOutputStream fileOut = fs.create(file, false);
 		return new JsonRecordWriter(fileOut);

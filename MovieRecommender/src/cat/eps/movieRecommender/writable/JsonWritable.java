@@ -4,12 +4,12 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
-import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
+
 
 public class JsonWritable implements WritableComparable<Object> {
 
@@ -28,8 +28,30 @@ public class JsonWritable implements WritableComparable<Object> {
 	Text movieGenre;
 
 	//Rating
-	IntWritable rating;
+	LongWritable rating;
 	LongWritable timestamp;
+
+	public JsonWritable(Text key) {
+		
+		try {
+			JSONObject obj = new JSONObject(key.toString());
+			this.id = new LongWritable(obj.getLong("id"));
+			this.userId=new LongWritable(obj.getLong("userId"));
+			this.userAge=new LongWritable(obj.getLong("userAge"));
+			this.userGenre = new Text(obj.getString("userGenre"));
+			this.userOccupation = new LongWritable(obj.getLong("userOccupation"));
+			this.userZip=new Text(obj.getString("userGenre"));
+
+			this.movieId=new LongWritable(obj.getLong("movieId"));
+			this.movieTitle=new Text(obj.getString("movieTitle"));
+			this.movieGenre=new Text(obj.getString("movieGenre"));
+
+			this.rating=new LongWritable(obj.getInt("rating"));
+			this.timestamp=new LongWritable(obj.getLong("timestamp"));
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+	}
 
 	public JsonWritable() {
 		this.id = new LongWritable();
@@ -44,14 +66,14 @@ public class JsonWritable implements WritableComparable<Object> {
 		this.movieTitle=new Text("");
 		this.movieGenre=new Text("");
 
-		this.rating=new IntWritable();
+		this.rating=new LongWritable();
 		this.timestamp=new LongWritable();
 	}
 
 	public JsonWritable(long id, JSONObject obj) {
-		this.id = new LongWritable(id);
 
 		try {
+			this.id = new LongWritable(id);
 			this.userId=new LongWritable(obj.getLong("userId"));
 			this.userAge=new LongWritable(obj.getLong("userAge"));
 			this.userGenre = new Text(obj.getString("userGenre"));
@@ -62,13 +84,59 @@ public class JsonWritable implements WritableComparable<Object> {
 			this.movieTitle=new Text(obj.getString("movieTitle"));
 			this.movieGenre=new Text(obj.getString("movieGenre"));
 
-			this.rating=new IntWritable(obj.getInt("rating"));
+			this.rating=new LongWritable(obj.getLong("rating"));
 			this.timestamp=new LongWritable(obj.getLong("timestamp"));
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
 	}
 
+
+	
+
+	public JsonWritable(String string) {
+		try {
+			JSONObject obj = new JSONObject(string);
+			this.id = new LongWritable(obj.getLong("id"));
+			this.userId=new LongWritable(obj.getLong("userId"));
+			this.userAge=new LongWritable(obj.getLong("userAge"));
+			this.userGenre = new Text(obj.getString("userGenre"));
+			this.userOccupation = new LongWritable(obj.getLong("userOccupation"));
+			this.userZip=new Text(obj.getString("userZip"));
+
+			this.movieId=new LongWritable(obj.getLong("movieId"));
+			this.movieTitle=new Text(obj.getString("movieTitle"));
+			this.movieGenre=new Text(obj.getString("movieGenre"));
+
+			this.rating=new LongWritable(obj.getLong("rating"));
+			this.timestamp=new LongWritable(obj.getLong("timestamp"));
+		} catch (JSONException e) {
+			System.err.println(e);
+			e.printStackTrace();
+		}
+	}
+
+	public JsonWritable(LongWritable key, String string) {
+		try {
+			JSONObject obj = new JSONObject(string);
+			this.id = new LongWritable(key.get());
+			this.userId=new LongWritable(obj.getLong("userId"));
+			this.userAge=new LongWritable(obj.getLong("userAge"));
+			this.userGenre = new Text(obj.getString("userGenre"));
+			this.userOccupation = new LongWritable(obj.getLong("userOccupation"));
+			this.userZip=new Text(obj.getString("userZip"));
+
+			this.movieId=new LongWritable(obj.getLong("movieId"));
+			this.movieTitle=new Text(obj.getString("movieTitle"));
+			this.movieGenre=new Text(obj.getString("movieGenre"));
+
+			this.rating=new LongWritable(obj.getLong("rating"));
+			this.timestamp=new LongWritable(obj.getLong("timestamp"));
+		} catch (JSONException e) {
+			System.err.println(e);
+			e.printStackTrace();
+		}
+	}
 
 	public LongWritable getId() {
 		return id;
@@ -142,23 +210,20 @@ public class JsonWritable implements WritableComparable<Object> {
 		this.movieGenre = movieGenre;
 	}
 
-	public IntWritable getRating() {
+	public LongWritable getRating() {
 		return rating;
 	}
 
-	public void setRating(IntWritable rating) {
+	public void setRating(LongWritable rating) {
 		this.rating = rating;
 	}
 
-
 	public LongWritable getTimestamp() {
 		return timestamp;
-	}
-
+	}
 	public void setTimestamp(LongWritable timestamp) {
 		this.timestamp = timestamp;
 	}
-
 
 
 	@Override
@@ -182,7 +247,6 @@ public class JsonWritable implements WritableComparable<Object> {
 
 	@Override
 	public void write(DataOutput dataOp) throws IOException {
-
 		this.id.write(dataOp);
 
 		this.userId.write(dataOp);
@@ -197,7 +261,6 @@ public class JsonWritable implements WritableComparable<Object> {
 
 		this.rating.write(dataOp);
 		this.timestamp.write(dataOp);
-
 	}
 
 	@Override

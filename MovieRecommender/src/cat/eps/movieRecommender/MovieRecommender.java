@@ -60,13 +60,13 @@ public class MovieRecommender extends Configured implements Tool {
 		job2BestRatedMovies.setJarByClass(MovieRecommender.class);
 		job2BestRatedMovies.setJobName("2.- Movies Mapper");
 		job2BestRatedMovies.setMapperClass(MoviesMapper.class);
-		job2BestRatedMovies.setReducerClass(MoviesReducer.class);
-		job2BestRatedMovies.setCombinerClass(MoviesReducer.class);
+		//job2BestRatedMovies.setReducerClass(MoviesReducer.class);
+		//job2BestRatedMovies.setCombinerClass(MoviesReducer.class);
 		job2BestRatedMovies.setInputFormatClass(TextInputFormat.class);
 		job2BestRatedMovies.setOutputFormatClass(TextOutputFormat.class);
 		job2BestRatedMovies.setOutputKeyClass(LongWritable.class);
 		job2BestRatedMovies.setOutputValueClass(Text.class);
-	//	job2BestRatedMovies.setNumReduceTasks(1);
+		//job2BestRatedMovies.setNumReduceTasks(1);
 
 		FileInputFormat.addInputPath(job2BestRatedMovies,new Path(args[1]+"/tmp/job1/part*"));
 		FileOutputFormat.setOutputPath(job2BestRatedMovies,new Path(args[1]+"/tmp/job2"));
@@ -84,7 +84,7 @@ public class MovieRecommender extends Configured implements Tool {
 		jo3BestRatedMovies.setMapperClass(BestRatedMoviesMapper.class);
 		//TODO: Implement inputFormat Class!!! jo3BestRatedMovies.setInputFormatClass(TextInputFormat.class);
 		jo3BestRatedMovies.setInputFormatClass(TextInputFormat.class);
-		jo3BestRatedMovies.setOutputFormatClass(MovieOutputFormat.class);
+		jo3BestRatedMovies.setOutputFormatClass(TextOutputFormat.class);
 		jo3BestRatedMovies.setOutputKeyClass(NullWritable.class);
 		jo3BestRatedMovies.setOutputValueClass(MovieWritable.class);
 		

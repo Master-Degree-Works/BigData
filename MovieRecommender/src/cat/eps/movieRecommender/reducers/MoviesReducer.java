@@ -2,6 +2,7 @@ package cat.eps.movieRecommender.reducers;
 
 import java.io.IOException;
 
+import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
@@ -20,7 +21,7 @@ public class MoviesReducer extends Reducer<LongWritable,Text,NullWritable,Text>
 			movie = val;
 		}
 		
-		movie.setOverallRating(new LongWritable(total));
+		movie.setOverallRating(new DoubleWritable(Double.valueOf(String.valueOf(total))));
 		
 		
 		context.write(NullWritable.get(),new Text(movie.toString()));  // Write reduce result {MovieWritable,ratingsCount}

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.NavigableSet;
 import java.util.TreeMap;
 
+import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
@@ -14,7 +15,7 @@ import cat.eps.movieRecommender.writable.MovieWritable;
 public class BestRatedMoviesMapper  extends Mapper<LongWritable, Text,NullWritable,MovieWritable >
 {
 
-	private TreeMap<LongWritable,MovieWritable> topMovies = new TreeMap<LongWritable,MovieWritable>();
+	private TreeMap<DoubleWritable,MovieWritable> topMovies = new TreeMap<DoubleWritable,MovieWritable>();
 
 	public void map(LongWritable key,Text  value, Context context) throws IOException, InterruptedException {
 
@@ -31,11 +32,11 @@ public class BestRatedMoviesMapper  extends Mapper<LongWritable, Text,NullWritab
 		Integer nTopInt = new Integer(nTop);
 		
 		boolean allItems = (nTopInt ==999);
-		NavigableSet<LongWritable> nSet = topMovies.descendingKeySet();
+		NavigableSet<DoubleWritable> nSet = topMovies.descendingKeySet();
 		  
 		int itemCounter=0;
 		
-		for (LongWritable key: nSet) {
+		for (DoubleWritable key: nSet) {
 			MovieWritable movie = topMovies.get(key);
 			if(itemCounter>=nTopInt && !allItems){
 				break;

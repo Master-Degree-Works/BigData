@@ -4,6 +4,7 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
+import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
@@ -19,7 +20,9 @@ public class MovieWritable implements WritableComparable<Object> {
 	Text movieTitle;
 	Text movieGenre;
 	
-	LongWritable overallRating;
+	DoubleWritable overallRating;
+	LongWritable numberOfOcurrences;
+
 
 
 	public MovieWritable(Text key) {
@@ -30,7 +33,8 @@ public class MovieWritable implements WritableComparable<Object> {
 			this.movieId=new LongWritable(obj.getLong("movieId"));
 			this.movieTitle=new Text(obj.getString("movieTitle"));
 			this.movieGenre=new Text(obj.getString("movieGenre"));
-			this.overallRating = new LongWritable(obj.getLong("rating"));
+			this.overallRating = new DoubleWritable(obj.getDouble("rating"));
+			this.numberOfOcurrences = new LongWritable();
 			
 		} catch (JSONException e) {
 			e.printStackTrace();
@@ -42,7 +46,8 @@ public class MovieWritable implements WritableComparable<Object> {
 		this.movieId=new LongWritable();
 		this.movieTitle=new Text("");
 		this.movieGenre=new Text("");
-		this.overallRating = new LongWritable();
+		this.overallRating = new DoubleWritable();
+		this.numberOfOcurrences = new LongWritable();
 	}
 
 	public MovieWritable(JSONObject obj) {
@@ -52,7 +57,8 @@ public class MovieWritable implements WritableComparable<Object> {
 			this.movieId=new LongWritable(obj.getLong("movieId"));
 			this.movieTitle=new Text(obj.getString("movieTitle"));
 			this.movieGenre=new Text(obj.getString("movieGenre"));
-			this.overallRating = new LongWritable(obj.getLong("rating"));
+			this.overallRating = new DoubleWritable(obj.getDouble("rating"));
+			this.numberOfOcurrences = new LongWritable(0);
 
 		} catch (JSONException e) {
 			e.printStackTrace();
@@ -71,10 +77,11 @@ public class MovieWritable implements WritableComparable<Object> {
 			this.movieTitle=new Text(obj.getString("movieTitle"));
 			this.movieGenre=new Text(obj.getString("movieGenre"));
 			if(addRatings){
-				this.overallRating = new LongWritable(obj.getLong("rating"));
+				this.overallRating = new DoubleWritable(obj.getDouble("rating"));
 			}else{
-				this.overallRating = new LongWritable(0);
+				this.overallRating = new DoubleWritable(0);
 			}
+			this.numberOfOcurrences = new LongWritable(0);
 			
 		} catch (JSONException e) {
 			e.printStackTrace();
@@ -90,17 +97,27 @@ public class MovieWritable implements WritableComparable<Object> {
 		strBOut.append("\"movieId\":"+this.getMovieId()+",");
 		strBOut.append("\"movieTitle\":\""+ this.getMovieTitle().toString()+"\",");
 		strBOut.append("\"movieGenre\":\""+this.getMovieGenre().toString()+"\",");
-		strBOut.append("\"rating\":"+ this.overallRating.toString());
+		strBOut.append("\"rating\":"+ this.overallRating.toString()+"\",");
+		strBOut.append("\"numberOfOcurrences\":"+ this.numberOfOcurrences.toString());
 		strBOut.append("},");
 		
 		return strBOut.toString();
 	}
+	
+	
+	public LongWritable getNumberOfOcurrences() {
+		return numberOfOcurrences;
+	}
 
-	public LongWritable getOverallRating() {
+	public void setNumberOfOcurrences(LongWritable numberOfOcurrences) {
+		this.numberOfOcurrences = numberOfOcurrences;
+	}
+
+	public DoubleWritable getOverallRating() {
 		return overallRating;
 	}
 
-	public void setOverallRating(LongWritable overallRating) {
+	public void setOverallRating(DoubleWritable overallRating) {
 		this.overallRating = overallRating;
 	}
 
@@ -134,6 +151,7 @@ public class MovieWritable implements WritableComparable<Object> {
 		this.movieTitle.readFields(dataIp);
 		this.movieGenre.readFields(dataIp);
 		this.overallRating.readFields(dataIp);
+		this.numberOfOcurrences.readFields(dataIp);
 	}
 
 	@Override
@@ -142,6 +160,7 @@ public class MovieWritable implements WritableComparable<Object> {
 		this.movieTitle.write(dataOp);
 		this.movieGenre.write(dataOp);
 		this.overallRating.write(dataOp);
+		this.numberOfOcurrences.write(dataOp);
 	}
 
 	@Override

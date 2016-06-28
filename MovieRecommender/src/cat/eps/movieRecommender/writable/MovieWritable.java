@@ -81,7 +81,7 @@ public class MovieWritable implements WritableComparable<Object> {
 			}else{
 				this.overallRating = new DoubleWritable(0);
 			}
-			this.numberOfOcurrences = new LongWritable(0);
+			this.numberOfOcurrences = obj.getString("numberOfOcurrences")!=null?new LongWritable(obj.getLong("numberOfOcurrences")):new LongWritable(0);
 			
 		} catch (JSONException e) {
 			e.printStackTrace();
@@ -97,7 +97,7 @@ public class MovieWritable implements WritableComparable<Object> {
 		strBOut.append("\"movieId\":"+this.getMovieId()+",");
 		strBOut.append("\"movieTitle\":\""+ this.getMovieTitle().toString()+"\",");
 		strBOut.append("\"movieGenre\":\""+this.getMovieGenre().toString()+"\",");
-		strBOut.append("\"rating\":"+ this.overallRating.toString()+"\",");
+		strBOut.append("\"rating\":"+ this.overallRating.toString()+",");
 		strBOut.append("\"numberOfOcurrences\":"+ this.numberOfOcurrences.toString());
 		strBOut.append("},");
 		

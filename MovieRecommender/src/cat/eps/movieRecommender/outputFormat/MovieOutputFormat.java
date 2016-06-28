@@ -37,13 +37,14 @@ public class MovieOutputFormat extends FileOutputFormat<NullWritable,MovieWritab
 			this.writeRecord("movieId", value.getMovieId()+",");
 			this.writeRecordString("movieTitle","\""+ value.getMovieTitle().toString()+"\",");
 			this.writeRecordString("movieGenre","\""+value.getMovieGenre().toString()+"\",");
-			this.writeRecord("rating",value.getOverallRating().toString());
+			this.writeRecord("rating",value.getOverallRating().toString()+",");
+			this.writeRecord("numberOfOcurrences",value.getNumberOfOcurrences().toString());
 			out.writeBytes("},\n");
 		} 
 
 		@Override
 		public void close(org.apache.hadoop.mapreduce.TaskAttemptContext context) throws IOException, InterruptedException {
-			try { out.writeBytes("\n]}");} 
+			try { out.writeBytes("]}");} 
 			finally { out.close(); }
 		}
 	}

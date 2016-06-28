@@ -23,7 +23,7 @@ public class BestRatedMoviesMapper  extends Mapper<LongWritable, Text,NullWritab
 		
 		MovieWritable movie = new MovieWritable(goodValues[1],true);
 
-		topMovies.put(movie.getOverallRating(),movie);
+		topMovies.put(new DoubleWritable(movie.getOverallRating().get()*movie.getNumberOfOcurrences().get()),movie);
 	}
 
 	@Override

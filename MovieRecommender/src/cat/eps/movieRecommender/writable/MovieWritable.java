@@ -25,9 +25,8 @@ public class MovieWritable implements WritableComparable<Object> {
 
 
 
-	public MovieWritable(Text key) {
+	public MovieWritable(Text key) throws JSONException {
 		
-		try {
 			JSONObject obj = new JSONObject(key.toString());
 			
 			this.movieId=new LongWritable(obj.getLong("movieId"));
@@ -36,37 +35,24 @@ public class MovieWritable implements WritableComparable<Object> {
 			this.overallRating = new DoubleWritable(obj.getDouble("rating"));
 			this.numberOfOcurrences = new LongWritable();
 			
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
 	}
 
 	public MovieWritable() {
-		
-		this.movieId=new LongWritable();
+				this.movieId=new LongWritable();
 		this.movieTitle=new Text("");
 		this.movieGenre=new Text("");
 		this.overallRating = new DoubleWritable();
 		this.numberOfOcurrences = new LongWritable();
 	}
 
-	public MovieWritable(JSONObject obj) {
-
-		try {
-		
+	public MovieWritable(JSONObject obj) throws JSONException {	
 			this.movieId=new LongWritable(obj.getLong("movieId"));
 			this.movieTitle=new Text(obj.getString("movieTitle"));
 			this.movieGenre=new Text(obj.getString("movieGenre"));
 			this.overallRating = new DoubleWritable(obj.getDouble("rating"));
 			this.numberOfOcurrences = new LongWritable(0);
-
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
 	}
 
-
-	
 
 
 	public MovieWritable(String string, boolean addRatings) {

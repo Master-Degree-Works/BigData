@@ -33,13 +33,18 @@ public class MovieOutputFormat extends FileOutputFormat<NullWritable,MovieWritab
 		}
 		
 		public synchronized void write(NullWritable key, MovieWritable value) throws IOException {
-			out.writeBytes("{");
+			if(this.out.size()==("{\"movies\":[\n").length()){
+				out.writeBytes("{");
+			}else{
+				out.writeBytes(",{");
+			}
+			
 			this.writeRecord("movieId", value.getMovieId()+",");
 			this.writeRecordString("movieTitle","\""+ value.getMovieTitle().toString()+"\",");
 			this.writeRecordString("movieGenre","\""+value.getMovieGenre().toString()+"\",");
 			this.writeRecord("rating",value.getOverallRating().toString()+",");
 			this.writeRecord("numberOfOcurrences",value.getNumberOfOcurrences().toString());
-			out.writeBytes("},\n");
+			out.writeBytes("}\n");
 		} 
 
 		@Override

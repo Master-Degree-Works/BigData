@@ -78,21 +78,21 @@ public class MovieRecommender extends Configured implements Tool {
 		
 		/*******************JOB 3:TOP N Movies********************/
 		conf.set("NTop", args[2]);
-		Job jo3BestRatedMovies = Job.getInstance(conf);
-		jo3BestRatedMovies.setJarByClass(MovieRecommender.class);
-		jo3BestRatedMovies.setJobName("3.- Top N Movies Mapper");
-		jo3BestRatedMovies.setMapperClass(BestRatedMoviesMapper.class);
+		Job job3BestRatedMovies = Job.getInstance(conf);
+		job3BestRatedMovies.setJarByClass(MovieRecommender.class);
+		job3BestRatedMovies.setJobName("3.- Top N Movies Mapper");
+		job3BestRatedMovies.setMapperClass(BestRatedMoviesMapper.class);
 		//TODO: Implement inputFormat Class!!! jo3BestRatedMovies.setInputFormatClass(TextInputFormat.class);
-		jo3BestRatedMovies.setInputFormatClass(TextInputFormat.class);
-		jo3BestRatedMovies.setOutputFormatClass(MovieOutputFormat.class);
-		jo3BestRatedMovies.setOutputKeyClass(NullWritable.class);
-		jo3BestRatedMovies.setOutputValueClass(MovieWritable.class);
+		job3BestRatedMovies.setInputFormatClass(TextInputFormat.class);
+		job3BestRatedMovies.setOutputFormatClass(MovieOutputFormat.class);
+		job3BestRatedMovies.setOutputKeyClass(NullWritable.class);
+		job3BestRatedMovies.setOutputValueClass(MovieWritable.class);
 		
-		FileInputFormat.addInputPath(jo3BestRatedMovies,new Path(args[1]+"/tmp/job2/part*"));
-		FileOutputFormat.setOutputPath(jo3BestRatedMovies,new Path(args[1]+"/tmp/job3"));
+		FileInputFormat.addInputPath(job3BestRatedMovies,new Path(args[1]+"/tmp/job2/part*"));
+		FileOutputFormat.setOutputPath(job3BestRatedMovies,new Path(args[1]+"/tmp/job3"));
 
 		ControlledJob cJob3 = new ControlledJob(conf);
-		cJob3.setJob(jo3BestRatedMovies);
+		cJob3.setJob(job3BestRatedMovies);
 		
 		/*******************JOB 3: M Most active users********************/
 		Job jo4MostActiveUsers = Job.getInstance(conf);

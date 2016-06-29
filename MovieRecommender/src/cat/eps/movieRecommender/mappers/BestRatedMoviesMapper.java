@@ -1,6 +1,7 @@
 package cat.eps.movieRecommender.mappers;
 
 import java.io.IOException;
+import java.util.Map.Entry;
 import java.util.NavigableSet;
 import java.util.TreeMap;
 
@@ -18,12 +19,16 @@ public class BestRatedMoviesMapper  extends Mapper<LongWritable, Text,NullWritab
 	private TreeMap<DoubleWritable,MovieWritable> topMovies = new TreeMap<DoubleWritable,MovieWritable>();
 
 	public void map(LongWritable key,Text  value, Context context) throws IOException, InterruptedException {
-
+		String minOcurrencesStr = context.getConfiguration().get("minOcurrences");
+		Integer minOcurrences = new Integer(minOcurrencesStr);
+		
 		String[] goodValues = value.toString().split("\t");
 		
 		MovieWritable movie = new MovieWritable(goodValues[1],true);
 
-		topMovies.put(new DoubleWritable(movie.getOverallRating().get()*movie.getNumberOfOcurrences().get()),movie);
+		if(movie.getNumberOfOcurrences().get()>minOcurrences){
+			topMovies.put(new DoubleWritable(movie.getOverallRating().get()),movie);
+		}
 	}
 
 	@Override
@@ -36,14 +41,22 @@ public class BestRatedMoviesMapper  extends Mapper<LongWritable, Text,NullWritab
 		  
 		int itemCounter=0;
 		
+		TreeMap<DoubleWritable,MovieWritable> resultMap = new TreeMap<DoubleWritable,MovieWritable>();
+		
 		for (DoubleWritable key: nSet) {
 			MovieWritable movie = topMovies.get(key);
 			if(itemCounter>=nTopInt && !allItems){
 				break;
 			}
 
-			context.write(NullWritable.get(),movie);
+			resultMap.put(key, movie);
+
 			itemCounter++;
 		}
+		
+		for(Entry<DoubleWritable, MovieWritable> movieResult : resultMap.entrySet()){
+			context.write(NullWritable.get(),movieResult.getValue());
+		}		
+		
 	}
 }

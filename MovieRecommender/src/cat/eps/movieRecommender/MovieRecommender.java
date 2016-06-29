@@ -32,8 +32,8 @@ public class MovieRecommender extends Configured implements Tool {
 
 		args = new GenericOptionsParser(conf, args).getRemainingArgs();
 
-		if (args.length != 3) {
-			System.err.printf("Usage: %s (<input dir> <output dir> <N Best Rated Movies>\n",
+		if (args.length != 4) {
+			System.err.printf("Usage: %s (<input dir> <output dir> <N Best Rated Movies> <Minimum number of ratings to take in consideration>\n",
 					getClass().getSimpleName());
 			return -1;
 		}
@@ -78,6 +78,7 @@ public class MovieRecommender extends Configured implements Tool {
 		
 		/*******************JOB 3:TOP N Movies********************/
 		conf.set("NTop", args[2]);
+		conf.set("minOcurrences", args[3]);
 		Job job3BestRatedMovies = Job.getInstance(conf);
 		job3BestRatedMovies.setJarByClass(MovieRecommender.class);
 		job3BestRatedMovies.setJobName("3.- Top N Movies Mapper");
@@ -94,14 +95,33 @@ public class MovieRecommender extends Configured implements Tool {
 		ControlledJob cJob3 = new ControlledJob(conf);
 		cJob3.setJob(job3BestRatedMovies);
 		
-		/*******************JOB 3: M Most active users********************/
-		Job jo4MostActiveUsers = Job.getInstance(conf);
+		/*******************JOB 4:TOP N Movies by ZIPCode********************/
+//		conf.set("NTop", args[2]);
+//		Job job4BestMoviesByZip = Job.getInstance(conf);
+//		job4BestMoviesByZip.setJarByClass(MovieRecommender.class);
+//		job4BestMoviesByZip.setJobName("3.- Top N Movies Mapper");
+//		job4BestMoviesByZip.setMapperClass(BestRatedMoviesMapper.class);
+//		job4BestMoviesByZip.setInputFormatClass(TextInputFormat.class);
+//		job4BestMoviesByZip.setOutputFormatClass(MovieOutputFormat.class);
+//		job4BestMoviesByZip.setOutputKeyClass(NullWritable.class);
+//		job4BestMoviesByZip.setOutputValueClass(MovieWritable.class);
+//		
+//		FileInputFormat.addInputPath(job4BestMoviesByZip,new Path(args[1]+"/tmp/job2/part*"));
+//		FileOutputFormat.setOutputPath(job4BestMoviesByZip,new Path(args[1]+"/tmp/job4"));
+//
+//		ControlledJob cJob4 = new ControlledJob(conf);
+//		cJob4.setJob(job4BestMoviesByZip);
+		
+		
+		/*******************JOB X: M Most active users********************/
+		Job jobXMostActiveUsers = Job.getInstance(conf);
 		
 		
 		JobControl jobctrl = new JobControl("jobctrl");
 		jobctrl.addJob(cJob1);
 		jobctrl.addJob(cJob2);
 		jobctrl.addJob(cJob3);
+//		jobctrl.addJob(cJob4);
 		
 		cJob2.addDependingJob(cJob1);
 		cJob3.addDependingJob(cJob2);

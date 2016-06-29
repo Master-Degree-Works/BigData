@@ -9,6 +9,7 @@ import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
+import org.codehaus.jettison.json.JSONException;
 
 import cat.eps.movieRecommender.writable.JsonWritable;
 import cat.eps.movieRecommender.writable.MovieWritable;
@@ -23,21 +24,27 @@ public class MoviesMapper  extends Mapper<LongWritable, Text,LongWritable,Text >
 
 		String[] goodValues = value.toString().split("\t");
 		
-		JsonWritable record = new JsonWritable(key,goodValues[1]);
-		MovieWritable movie = new MovieWritable(goodValues[1],false);
-		LongWritable rating = record.getRating();
-		
-		if(movies.containsKey(movie)){
-			Long existentRatings = movies.get(movie);
-			existentRatings+=rating.get();
+		JsonWritable record;
+		try {
+			record = new JsonWritable(key,goodValues[1]);
+			MovieWritable movie = new MovieWritable(goodValues[1],false);
+			LongWritable rating = record.getRating();
+			
+			if(movies.containsKey(movie)){
+				Long existentRatings = movies.get(movie);
+				existentRatings+=rating.get();
 
-			ocurrencesMap.replace(movie.getMovieId(),ocurrencesMap.get(movie.getMovieId()),ocurrencesMap.get(movie.getMovieId())+1);
+				ocurrencesMap.replace(movie.getMovieId(),ocurrencesMap.get(movie.getMovieId()),ocurrencesMap.get(movie.getMovieId())+1);
 
-			movies.replace(movie, movies.get(movie), existentRatings);
-		}else{
-			ocurrencesMap.put(movie.getMovieId(), 1l);
-			movies.put(movie, rating.get());
+				movies.replace(movie, movies.get(movie), existentRatings);
+			}else{
+				ocurrencesMap.put(movie.getMovieId(), 1l);
+				movies.put(movie, rating.get());
+			}
+		} catch (JSONException e) {
+			e.printStackTrace();
 		}
+		
 	}
 
 	@Override

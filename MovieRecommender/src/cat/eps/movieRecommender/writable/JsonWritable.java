@@ -116,8 +116,8 @@ public class JsonWritable implements WritableComparable<Object> {
 		}
 	}
 
-	public JsonWritable(LongWritable key, String string) {
-		try {
+	public JsonWritable(LongWritable key, String string) throws JSONException {
+		
 			JSONObject obj = new JSONObject(string);
 			this.id = new LongWritable(key.get());
 			this.userId=new LongWritable(obj.getLong("userId"));
@@ -132,10 +132,7 @@ public class JsonWritable implements WritableComparable<Object> {
 
 			this.rating=new LongWritable(obj.getLong("rating"));
 			this.timestamp=new LongWritable(obj.getLong("timestamp"));
-		} catch (JSONException e) {
-			System.err.println(e);
-			e.printStackTrace();
-		}
+		
 	}
 
 	public LongWritable getId() {

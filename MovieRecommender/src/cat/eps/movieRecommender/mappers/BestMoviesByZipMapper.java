@@ -11,11 +11,12 @@ import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
+import org.codehaus.jettison.json.JSONException;
 
 import cat.eps.movieRecommender.writable.JsonWritable;
 import cat.eps.movieRecommender.writable.MovieWritable;
 
-public class BestMoviesByZipMapper  extends Mapper<LongWritable, Text,Text,MovieWritable >
+public class BestMoviesByZipMapper  extends Mapper<LongWritable, Text,Text,Text >
 {
 
 	private TreeMap<Text,List<MovieWritable>> moviesByZip = new TreeMap<Text,List<MovieWritable>>();
@@ -25,43 +26,45 @@ public class BestMoviesByZipMapper  extends Mapper<LongWritable, Text,Text,Movie
 
 		String[] goodValues = value.toString().split("\t");
 		
-		JsonWritable record = new JsonWritable(key,goodValues[1]);
-		MovieWritable movie = new MovieWritable(goodValues[1],true);
-		LongWritable rating = record.getRating();
-		
-		if(moviesByZip.containsKey(record.getUserZip())){
-			moviesByZip.get(record.getUserZip()).add(movie);
-		}else{
-			moviesByZip.put(record.getUserZip(), new ArrayList<MovieWritable>());
+		JsonWritable record;
+		try {
+			record = new JsonWritable(key,goodValues[1]);
+			MovieWritable movie = new MovieWritable(goodValues[1],true);
+			LongWritable rating = record.getRating();
+			
+			if(!moviesByZip.isEmpty() && moviesByZip.containsKey(record.getUserZip())){
+				moviesByZip.get(record.getUserZip()).add(movie);
+			}else{
+				moviesByZip.put(record.getUserZip(), new ArrayList<MovieWritable>());
+			}
+		} catch (JSONException e) {
+			e.printStackTrace();
 		}
 	}
 
 	@Override
 	protected void cleanup(Context context) throws IOException, InterruptedException {
 		  	
-		for (Text zipCode: moviesByZip.keySet()) {
-			List<MovieWritable> moviesInZip = moviesByZip.get(zipCode);
-			MovieWritable bestMovieForZip = moviesInZip.get(0);
-			
-			for(MovieWritable movieInZip : moviesInZip){
-				if(movieInZip.getOverallRating().get()>bestMovieForZip.getOverallRating().get()){
-					bestMovieForZip = movieInZip;
-				}
-			}
-			
-			context.write(zipCode,bestMovieForZip);
-			
-//			HashMap<MovieWritable,DoubleWritable> movieRatings = new HashMap<MovieWritable,DoubleWritable>();
+//		for (Text zipCode: moviesByZip.keySet()) {
+//			List<MovieWritable> moviesInZip = moviesByZip.get(zipCode);
+//			MovieWritable bestMovieForZip = moviesInZip.get(0);
+//			
 //			for(MovieWritable movieInZip : moviesInZip){
-//				if(movieRatings.containsKey(movieInZip)){
-//					DoubleWritable actualRating = movieRatings.get(movieInZip);
-////					DoubleWritable actualRating actualRating.get()= movieInZip.
-//				}else{
-//					movieRatings.put(movieInZip, movieInZip.getOverallRating());
+//				if(movieInZip.getOverallRating().get()>bestMovieForZip.getOverallRating().get()){
+//					bestMovieForZip = movieInZip;
 //				}
 //			}
-		
-		//	context.write(movieKey.getMovieId(),new Text(movieKey.toString()));
+//			
+//			context.write(zipCode,bestMovieForZip);
+//		}
+		for (Text zipCode: moviesByZip.keySet()) {
+			List<MovieWritable> moviesInZip = moviesByZip.get(zipCode);
+						
+			for(MovieWritable movieInZip : moviesInZip){
+				context.write(new Text("A"+zipCode),new Text(movieInZip.toString()));
+			}
+			
+			
 		}
 	}
 }

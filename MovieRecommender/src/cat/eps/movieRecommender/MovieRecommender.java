@@ -9,6 +9,7 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.jobcontrol.JobControl;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.input.MultipleInputs;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.jobcontrol.ControlledJob;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
@@ -18,10 +19,12 @@ import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 
 import cat.eps.movieRecommender.jobControl.JobRunner;
+import cat.eps.movieRecommender.mappers.BestMoviesByZipMapper;
 import cat.eps.movieRecommender.mappers.BestRatedMoviesMapper;
 import cat.eps.movieRecommender.mappers.InputReaderMapper;
 import cat.eps.movieRecommender.mappers.MoviesMapper;
 import cat.eps.movieRecommender.outputFormat.MovieOutputFormat;
+import cat.eps.movieRecommender.reducers.BestMoviesByZipReducer;
 import cat.eps.movieRecommender.reducers.MoviesReducer;
 import cat.eps.movieRecommender.writable.MovieWritable;
 
@@ -96,21 +99,30 @@ public class MovieRecommender extends Configured implements Tool {
 		cJob3.setJob(job3BestRatedMovies);
 		
 		/*******************JOB 4:TOP N Movies by ZIPCode********************/
-//		conf.set("NTop", args[2]);
 //		Job job4BestMoviesByZip = Job.getInstance(conf);
 //		job4BestMoviesByZip.setJarByClass(MovieRecommender.class);
-//		job4BestMoviesByZip.setJobName("3.- Top N Movies Mapper");
-//		job4BestMoviesByZip.setMapperClass(BestRatedMoviesMapper.class);
+//		job4BestMoviesByZip.setJobName("4.- Top N Movies by ZIPCode");
+//		job4BestMoviesByZip.setMapperClass(BestMoviesByZipMapper.class);
+//		job4BestMoviesByZip.setMapperClass(MoviesMapper.class);
+//		job4BestMoviesByZip.setReducerClass(BestMoviesByZipReducer.class);
 //		job4BestMoviesByZip.setInputFormatClass(TextInputFormat.class);
 //		job4BestMoviesByZip.setOutputFormatClass(MovieOutputFormat.class);
 //		job4BestMoviesByZip.setOutputKeyClass(NullWritable.class);
 //		job4BestMoviesByZip.setOutputValueClass(MovieWritable.class);
 //		
-//		FileInputFormat.addInputPath(job4BestMoviesByZip,new Path(args[1]+"/tmp/job2/part*"));
+//		MultipleInputs.addInputPath(job4BestMoviesByZip, new Path(args[1]+"/tmp/job1/part*"), TextInputFormat.class, BestMoviesByZipMapper.class);
+//		MultipleInputs.addInputPath(job4BestMoviesByZip, new Path(args[1]+"/tmp/job1/part*"), TextInputFormat.class, MoviesMapper.class);
+//		
+//		//FileInputFormat.addInputPath(job4BestMoviesByZip,new Path(args[1]+"/tmp/job1/part*"));
 //		FileOutputFormat.setOutputPath(job4BestMoviesByZip,new Path(args[1]+"/tmp/job4"));
 //
 //		ControlledJob cJob4 = new ControlledJob(conf);
 //		cJob4.setJob(job4BestMoviesByZip);
+		
+		
+		
+		
+		
 		
 		
 		/*******************JOB X: M Most active users********************/
@@ -125,6 +137,8 @@ public class MovieRecommender extends Configured implements Tool {
 		
 		cJob2.addDependingJob(cJob1);
 		cJob3.addDependingJob(cJob2);
+		
+//		cJob4.addDependingJob(cJob2);
 		
 		
 		Thread jobRunnerThread = new Thread(new JobRunner(jobctrl));

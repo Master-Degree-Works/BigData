@@ -23,6 +23,7 @@ import cat.eps.movieRecommender.mappers.BestMoviesByZipMapper;
 import cat.eps.movieRecommender.mappers.BestRatedMoviesMapper;
 import cat.eps.movieRecommender.mappers.InputReaderMapper;
 import cat.eps.movieRecommender.mappers.MoviesMapper;
+import cat.eps.movieRecommender.mappers.MoviesMapper2;
 import cat.eps.movieRecommender.outputFormat.MovieOutputFormat;
 import cat.eps.movieRecommender.reducers.BestMoviesByZipReducer;
 import cat.eps.movieRecommender.reducers.MoviesReducer;
@@ -106,19 +107,20 @@ public class MovieRecommender extends Configured implements Tool {
 		job4BestMoviesByZip.setMapperClass(BestMoviesByZipMapper.class);
 		
 		//El mapper que compta les ocurrencies..un altre cop....Potser hauria de tenir una altra classe que s'adaptes als paràmetres d'aquest Job
-//		job4BestMoviesByZip.setMapperClass(MoviesMapper.class);
+		job4BestMoviesByZip.setMapperClass(MoviesMapper2.class);
 		
 		//El reducer que fa el matching dels dos mappers anteriors, per treure la movie millor valorada per zipCode
-//		job4BestMoviesByZip.setReducerClass(BestMoviesByZipReducer.class);
+		job4BestMoviesByZip.setReducerClass(BestMoviesByZipReducer.class);
+		
 		job4BestMoviesByZip.setInputFormatClass(TextInputFormat.class);
 		job4BestMoviesByZip.setOutputFormatClass(TextOutputFormat.class);
 		job4BestMoviesByZip.setOutputKeyClass(Text.class);
 		job4BestMoviesByZip.setOutputValueClass(Text.class);
 		
-//		MultipleInputs.addInputPath(job4BestMoviesByZip, new Path(args[1]+"/tmp/job1/part*"), TextInputFormat.class, BestMoviesByZipMapper.class);
-//		MultipleInputs.addInputPath(job4BestMoviesByZip, new Path(args[1]+"/tmp/job1/part*"), TextInputFormat.class, MoviesMapper.class);
+		MultipleInputs.addInputPath(job4BestMoviesByZip, new Path(args[1]+"/tmp/job1/part*"), TextInputFormat.class, BestMoviesByZipMapper.class);
+		MultipleInputs.addInputPath(job4BestMoviesByZip, new Path(args[1]+"/tmp/job1/part*"), TextInputFormat.class, MoviesMapper2.class);
 		
-		FileInputFormat.addInputPath(job4BestMoviesByZip,new Path(args[1]+"/tmp/job1/part*"));
+//		FileInputFormat.addInputPath(job4BestMoviesByZip,new Path(args[1]+"/tmp/job1/part*"));
 		FileOutputFormat.setOutputPath(job4BestMoviesByZip,new Path(args[1]+"/tmp/job4"));
 
 		ControlledJob cJob4 = new ControlledJob(conf);

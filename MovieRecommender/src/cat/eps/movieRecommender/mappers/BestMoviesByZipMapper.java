@@ -47,8 +47,8 @@ public class BestMoviesByZipMapper  extends Mapper<LongWritable, Text,Text,Text 
 			for(MovieWritable movieInZip : moviesInZip){
 				movieInZip.setNumberOfOcurrences(new LongWritable(0));
 				movieInZip.setOverallRating(new DoubleWritable(0));
-//				context.write(new Text("A"+zipCode),new Text(movieInZip.toString()));
-				context.write(new Text(zipCode),new Text(movieInZip.toString()));
+				context.write(new Text("A###"+zipCode),new Text(movieInZip.toString()));
+//				context.write(new Text(zipCode),new Text(movieInZip.toString()));
 			}
 			
 			

@@ -23,26 +23,21 @@ public class MovieWritable implements WritableComparable<Object> {
 	DoubleWritable overallRating;
 	LongWritable numberOfOcurrences;
 
-
-
 	public MovieWritable(Text key) throws JSONException {
-		
 			JSONObject obj = new JSONObject(key.toString());
-			
 			this.movieId=new LongWritable(obj.getLong("movieId"));
 			this.movieTitle=new Text(obj.getString("movieTitle"));
 			this.movieGenre=new Text(obj.getString("movieGenre"));
 			this.overallRating = new DoubleWritable(obj.getDouble("rating"));
-			this.numberOfOcurrences = new LongWritable(0);
-			
+			this.numberOfOcurrences = new LongWritable(0);		
 	}
 
 	public MovieWritable() {
-				this.movieId=new LongWritable();
+		this.movieId=new LongWritable();
 		this.movieTitle=new Text("");
 		this.movieGenre=new Text("");
 		this.overallRating = new DoubleWritable();
-		this.numberOfOcurrences = new LongWritable();
+		this.numberOfOcurrences = new LongWritable(0);
 	}
 
 	public MovieWritable(JSONObject obj) throws JSONException {	
@@ -50,7 +45,7 @@ public class MovieWritable implements WritableComparable<Object> {
 			this.movieTitle=new Text(obj.getString("movieTitle"));
 			this.movieGenre=new Text(obj.getString("movieGenre"));
 			this.overallRating = new DoubleWritable(obj.getDouble("rating"));
-			this.numberOfOcurrences = new LongWritable(0);
+			this.numberOfOcurrences = obj.getLong("numberOfOcurrences")!=0l?new LongWritable(obj.getLong("numberOfOcurrences")):new LongWritable(0);
 	}
 
 
@@ -68,13 +63,10 @@ public class MovieWritable implements WritableComparable<Object> {
 				this.overallRating = new DoubleWritable(0);
 			}
 			this.numberOfOcurrences = obj.getLong("numberOfOcurrences")!=0l?new LongWritable(obj.getLong("numberOfOcurrences")):new LongWritable(0);
-			
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
 	}
-
-	
 	
 	@Override
 	public String toString() {
@@ -84,7 +76,7 @@ public class MovieWritable implements WritableComparable<Object> {
 		strBOut.append("\"movieTitle\":\""+ this.getMovieTitle().toString()+"\",");
 		strBOut.append("\"movieGenre\":\""+this.getMovieGenre().toString()+"\",");
 		strBOut.append("\"rating\":"+ this.overallRating.toString()+",");
-		strBOut.append("\"numberOfOcurrences\":"+ this.numberOfOcurrences.toString());
+		strBOut.append("\"numberOfOcurrences\":"+ (this.numberOfOcurrences.get()!=0l && this.numberOfOcurrences!=null?this.numberOfOcurrences.toString():"0"));
 		strBOut.append("},");
 		
 		return strBOut.toString();

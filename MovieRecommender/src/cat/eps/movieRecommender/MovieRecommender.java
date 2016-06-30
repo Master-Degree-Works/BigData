@@ -99,25 +99,30 @@ public class MovieRecommender extends Configured implements Tool {
 		cJob3.setJob(job3BestRatedMovies);
 		
 		/*******************JOB 4:TOP N Movies by ZIPCode********************/
-//		Job job4BestMoviesByZip = Job.getInstance(conf);
-//		job4BestMoviesByZip.setJarByClass(MovieRecommender.class);
-//		job4BestMoviesByZip.setJobName("4.- Top N Movies by ZIPCode");
-//		job4BestMoviesByZip.setMapperClass(BestMoviesByZipMapper.class);
+		Job job4BestMoviesByZip = Job.getInstance(conf);
+		job4BestMoviesByZip.setJarByClass(MovieRecommender.class);
+		job4BestMoviesByZip.setJobName("4.- Top N Movies by ZIPCode");
+		//El Mapper que classifica per zipCode, marcant la sortida amb una A pel reducer
+		job4BestMoviesByZip.setMapperClass(BestMoviesByZipMapper.class);
+		
+		//El mapper que compta les ocurrencies..un altre cop....Potser hauria de tenir una altra classe que s'adaptes als paràmetres d'aquest Job
 //		job4BestMoviesByZip.setMapperClass(MoviesMapper.class);
+		
+		//El reducer que fa el matching dels dos mappers anteriors, per treure la movie millor valorada per zipCode
 //		job4BestMoviesByZip.setReducerClass(BestMoviesByZipReducer.class);
-//		job4BestMoviesByZip.setInputFormatClass(TextInputFormat.class);
-//		job4BestMoviesByZip.setOutputFormatClass(MovieOutputFormat.class);
-//		job4BestMoviesByZip.setOutputKeyClass(NullWritable.class);
-//		job4BestMoviesByZip.setOutputValueClass(MovieWritable.class);
-//		
+		job4BestMoviesByZip.setInputFormatClass(TextInputFormat.class);
+		job4BestMoviesByZip.setOutputFormatClass(TextOutputFormat.class);
+		job4BestMoviesByZip.setOutputKeyClass(Text.class);
+		job4BestMoviesByZip.setOutputValueClass(Text.class);
+		
 //		MultipleInputs.addInputPath(job4BestMoviesByZip, new Path(args[1]+"/tmp/job1/part*"), TextInputFormat.class, BestMoviesByZipMapper.class);
 //		MultipleInputs.addInputPath(job4BestMoviesByZip, new Path(args[1]+"/tmp/job1/part*"), TextInputFormat.class, MoviesMapper.class);
-//		
-//		//FileInputFormat.addInputPath(job4BestMoviesByZip,new Path(args[1]+"/tmp/job1/part*"));
-//		FileOutputFormat.setOutputPath(job4BestMoviesByZip,new Path(args[1]+"/tmp/job4"));
-//
-//		ControlledJob cJob4 = new ControlledJob(conf);
-//		cJob4.setJob(job4BestMoviesByZip);
+		
+		FileInputFormat.addInputPath(job4BestMoviesByZip,new Path(args[1]+"/tmp/job1/part*"));
+		FileOutputFormat.setOutputPath(job4BestMoviesByZip,new Path(args[1]+"/tmp/job4"));
+
+		ControlledJob cJob4 = new ControlledJob(conf);
+		cJob4.setJob(job4BestMoviesByZip);
 		
 		
 		
@@ -133,12 +138,13 @@ public class MovieRecommender extends Configured implements Tool {
 		jobctrl.addJob(cJob1);
 		jobctrl.addJob(cJob2);
 		jobctrl.addJob(cJob3);
-//		jobctrl.addJob(cJob4);
+		jobctrl.addJob(cJob4);
 		
 		cJob2.addDependingJob(cJob1);
+		cJob4.addDependingJob(cJob1);
+		
 		cJob3.addDependingJob(cJob2);
 		
-//		cJob4.addDependingJob(cJob2);
 		
 		
 		Thread jobRunnerThread = new Thread(new JobRunner(jobctrl));

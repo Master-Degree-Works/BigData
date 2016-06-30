@@ -2,9 +2,7 @@ package cat.eps.movieRecommender.mappers;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.NavigableSet;
 import java.util.TreeMap;
 
 import org.apache.hadoop.io.DoubleWritable;
@@ -20,7 +18,6 @@ public class BestMoviesByZipMapper  extends Mapper<LongWritable, Text,Text,Text 
 {
 
 	private TreeMap<Text,List<MovieWritable>> moviesByZip = new TreeMap<Text,List<MovieWritable>>();
-	private HashMap<LongWritable,Long> ocurrencesMap = new HashMap<LongWritable,Long>();
 
 	public void map(LongWritable key,Text  value, Context context) throws IOException, InterruptedException {
 
@@ -30,7 +27,6 @@ public class BestMoviesByZipMapper  extends Mapper<LongWritable, Text,Text,Text 
 		try {
 			record = new JsonWritable(key,goodValues[1]);
 			MovieWritable movie = new MovieWritable(goodValues[1],true);
-			LongWritable rating = record.getRating();
 			
 			if(!moviesByZip.isEmpty() && moviesByZip.containsKey(record.getUserZip())){
 				moviesByZip.get(record.getUserZip()).add(movie);
@@ -45,23 +41,14 @@ public class BestMoviesByZipMapper  extends Mapper<LongWritable, Text,Text,Text 
 	@Override
 	protected void cleanup(Context context) throws IOException, InterruptedException {
 		  	
-//		for (Text zipCode: moviesByZip.keySet()) {
-//			List<MovieWritable> moviesInZip = moviesByZip.get(zipCode);
-//			MovieWritable bestMovieForZip = moviesInZip.get(0);
-//			
-//			for(MovieWritable movieInZip : moviesInZip){
-//				if(movieInZip.getOverallRating().get()>bestMovieForZip.getOverallRating().get()){
-//					bestMovieForZip = movieInZip;
-//				}
-//			}
-//			
-//			context.write(zipCode,bestMovieForZip);
-//		}
 		for (Text zipCode: moviesByZip.keySet()) {
 			List<MovieWritable> moviesInZip = moviesByZip.get(zipCode);
 						
 			for(MovieWritable movieInZip : moviesInZip){
-				context.write(new Text("A"+zipCode),new Text(movieInZip.toString()));
+				movieInZip.setNumberOfOcurrences(new LongWritable(0));
+				movieInZip.setOverallRating(new DoubleWritable(0));
+//				context.write(new Text("A"+zipCode),new Text(movieInZip.toString()));
+				context.write(new Text(zipCode),new Text(movieInZip.toString()));
 			}
 			
 			

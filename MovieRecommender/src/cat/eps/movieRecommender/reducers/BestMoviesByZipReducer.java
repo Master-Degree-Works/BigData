@@ -2,12 +2,10 @@ package cat.eps.movieRecommender.reducers;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.TreeMap;
 
 import org.apache.hadoop.io.LongWritable;
-import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.codehaus.jettison.json.JSONException;
@@ -25,29 +23,25 @@ public class BestMoviesByZipReducer extends Reducer<Text,Text,Text,Text>
 
 	public void reduce(Text key, Iterable<Text> values,Context context) throws IOException, InterruptedException
 	{
-
-		if(key.toString().contains("A###")){
-			String userZip = key.toString().substring("A###".length()-1);
-			context.write(new Text("UserZip"), new Text(userZip));
-			if(moviesByZip.containsKey(userZip)){
-				moviesByZip.get(userZip).addAll(makeCollection(values));
-			}else{
-				moviesByZip.put(new Text(userZip),makeCollection(values));
+		
+		for(Text iterable:values){
+			if(key.toString().contains("AAAA")){
+				String userZip = key.toString().replace("AAAA","");
+				String movie = iterable.toString();
+				if(moviesByZip.containsKey(userZip)){
+					moviesByZip.get(userZip).add(new Text(movie));
+				}else{
+					List<Text> movies = new ArrayList<Text>();
+					movies.add(new Text(movie));
+					moviesByZip.put(new Text(userZip),movies);
+				}
 			}
-		}else{
-			for(Text movieText : values){
-				ratingsMovies.put(new LongWritable(Long.parseLong(key.toString())), movieText);
+			else{
+				ratingsMovies.put(new LongWritable(Long.parseLong(key.toString())), iterable);
 			}
-		}
+		}		
 	}
 
-	public List<Text> makeCollection(Iterable<Text> iter) {
-		List<Text> list = new ArrayList<Text>();
-	    for (Text item : iter) {
-	        list.add(item);
-	    }
-	    return list;
-	}
 
 	@Override
 	protected void cleanup(Context context) throws IOException, InterruptedException {
@@ -58,8 +52,7 @@ public class BestMoviesByZipReducer extends Reducer<Text,Text,Text,Text>
 
 			MovieWritable highestRatedMovie = null;
 			context.write(userZip, new Text(""));
-//				highestRatedMovie =  new MovieWritable(moviesByZip.get(userZip).next());
-				
+
 				for(Text movieText: moviesByZip.get(userZip)){
 					try {
 						
@@ -83,17 +76,8 @@ public class BestMoviesByZipReducer extends Reducer<Text,Text,Text,Text>
 						throw new IOException(e.getCause());
 					}
 //					highestRatedByZipCode.put(userZip, highestRatedMovie);
-				
 			}
-				
-		
-
 		}
-
-		
-		
-		
-		super.cleanup(context);
 	}
 
 

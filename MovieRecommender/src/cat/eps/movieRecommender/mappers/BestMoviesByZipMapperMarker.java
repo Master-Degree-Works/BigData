@@ -14,9 +14,9 @@ import org.codehaus.jettison.json.JSONException;
 import cat.eps.movieRecommender.writable.JsonWritable;
 import cat.eps.movieRecommender.writable.MovieWritable;
 
-public class BestMoviesByZipMapper  extends Mapper<LongWritable, Text,Text,Text >
+public class BestMoviesByZipMapperMarker  extends Mapper<LongWritable, Text,Text,Text >
 {
-
+//TODO!!!!!!
 	private TreeMap<Text,List<MovieWritable>> moviesByZip = new TreeMap<Text,List<MovieWritable>>();
 
 	public void map(LongWritable key,Text  value, Context context) throws IOException, InterruptedException {
@@ -47,7 +47,7 @@ public class BestMoviesByZipMapper  extends Mapper<LongWritable, Text,Text,Text 
 			for(MovieWritable movieInZip : moviesInZip){
 				movieInZip.setNumberOfOcurrences(new LongWritable(0));
 				movieInZip.setOverallRating(new DoubleWritable(0));
-				context.write(new Text(zipCode),new Text(movieInZip.toString()));
+				context.write(new Text("AAAA"+zipCode),new Text(movieInZip.toString()));
 			}
 			
 			

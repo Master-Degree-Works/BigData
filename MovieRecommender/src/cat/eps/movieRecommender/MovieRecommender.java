@@ -6,6 +6,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.jobcontrol.JobControl;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
@@ -20,6 +21,7 @@ import org.apache.hadoop.util.ToolRunner;
 
 import cat.eps.movieRecommender.jobControl.JobRunner;
 import cat.eps.movieRecommender.mappers.BestMoviesByZipMapper;
+import cat.eps.movieRecommender.mappers.BestMoviesByZipMapperMarker;
 import cat.eps.movieRecommender.mappers.BestRatedMoviesMapper;
 import cat.eps.movieRecommender.mappers.InputReaderMapper;
 import cat.eps.movieRecommender.mappers.MoviesMapper;
@@ -103,28 +105,46 @@ public class MovieRecommender extends Configured implements Tool {
 		Job job4BestMoviesByZip = Job.getInstance(conf);
 		job4BestMoviesByZip.setJarByClass(MovieRecommender.class);
 		job4BestMoviesByZip.setJobName("4.- Top N Movies by ZIPCode");
-		//El Mapper que classifica per zipCode, marcant la sortida amb una A pel reducer
+		//El Mapper que classifica per zipCode, marcant la sortida amb  AAAA pel reducer
 		job4BestMoviesByZip.setMapperClass(BestMoviesByZipMapper.class);
-		
-		//El mapper que compta les ocurrencies..un altre cop....Potser hauria de tenir una altra classe que s'adaptes als paràmetres d'aquest Job
-		job4BestMoviesByZip.setMapperClass(MoviesMapper2.class);
-		
-		//El reducer que fa el matching dels dos mappers anteriors, per treure la movie millor valorada per zipCode
-		job4BestMoviesByZip.setReducerClass(BestMoviesByZipReducer.class);
-		
-		job4BestMoviesByZip.setInputFormatClass(TextInputFormat.class);
+				job4BestMoviesByZip.setInputFormatClass(TextInputFormat.class);
 		job4BestMoviesByZip.setOutputFormatClass(TextOutputFormat.class);
 		job4BestMoviesByZip.setOutputKeyClass(Text.class);
 		job4BestMoviesByZip.setOutputValueClass(Text.class);
-		
-		MultipleInputs.addInputPath(job4BestMoviesByZip, new Path(args[1]+"/tmp/job1/part*"), TextInputFormat.class, BestMoviesByZipMapper.class);
-		MultipleInputs.addInputPath(job4BestMoviesByZip, new Path(args[1]+"/tmp/job1/part*"), TextInputFormat.class, MoviesMapper2.class);
-		
-//		FileInputFormat.addInputPath(job4BestMoviesByZip,new Path(args[1]+"/tmp/job1/part*"));
+
+		FileInputFormat.addInputPath(job4BestMoviesByZip,new Path(args[1]+"/tmp/job1/part*"));
 		FileOutputFormat.setOutputPath(job4BestMoviesByZip,new Path(args[1]+"/tmp/job4"));
 
 		ControlledJob cJob4 = new ControlledJob(conf);
 		cJob4.setJob(job4BestMoviesByZip);
+		
+		/*******************JOB 5:TOP N Movies by ZIPCode Gatherer********************/
+		JobConf jobConfReadTopN = new JobConf(getConf(), BestMoviesByZipMapperMarker.class);
+		Job job5BestMoviesByZipGatherer = Job.getInstance(conf);
+		job5BestMoviesByZipGatherer.setJarByClass(MovieRecommender.class);
+		job5BestMoviesByZipGatherer.setJobName("5.- Top N Movies by ZIPCode gatherer");
+		//El Mapper que classifica per zipCode, marcant la sortida amb  AAAA pel reducer
+		job5BestMoviesByZipGatherer.setMapperClass(BestMoviesByZipMapperMarker.class);
+		
+		//El mapper que compta les ocurrencies..un altre cop....Potser hauria de tenir una altra classe que s'adaptes als paràmetres d'aquest Job
+		job5BestMoviesByZipGatherer.setMapperClass(MoviesMapper2.class);
+		
+		//El reducer que fa el matching dels dos mappers anteriors, per treure la movie millor valorada per zipCode
+		job5BestMoviesByZipGatherer.setReducerClass(BestMoviesByZipReducer.class);
+		
+		job5BestMoviesByZipGatherer.setInputFormatClass(TextInputFormat.class);
+		job5BestMoviesByZipGatherer.setOutputFormatClass(TextOutputFormat.class);
+		job5BestMoviesByZipGatherer.setOutputKeyClass(Text.class);
+		job5BestMoviesByZipGatherer.setOutputValueClass(Text.class);
+		
+		MultipleInputs.addInputPath(job5BestMoviesByZipGatherer, new Path(args[1]+"/tmp/job4/part*"), TextInputFormat.class, BestMoviesByZipMapperMarker.class);
+		MultipleInputs.addInputPath(job5BestMoviesByZipGatherer, new Path(args[1]+"/tmp/job1/part*"), TextInputFormat.class, MoviesMapper2.class);
+		
+	
+		FileOutputFormat.setOutputPath(job4BestMoviesByZip,new Path(args[1]+"/tmp/job5"));
+
+		ControlledJob cJob5 = new ControlledJob(jobConfReadTopN);
+		cJob5.setJob(job5BestMoviesByZipGatherer);
 		
 		
 		
@@ -141,11 +161,14 @@ public class MovieRecommender extends Configured implements Tool {
 		jobctrl.addJob(cJob2);
 		jobctrl.addJob(cJob3);
 		jobctrl.addJob(cJob4);
+		jobctrl.addJob(cJob5);
 		
 		cJob2.addDependingJob(cJob1);
 		cJob4.addDependingJob(cJob1);
 		
 		cJob3.addDependingJob(cJob2);
+		
+		cJob5.addDependingJob(cJob4);
 		
 		
 		

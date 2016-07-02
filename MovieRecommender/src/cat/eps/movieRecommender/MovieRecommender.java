@@ -3,7 +3,6 @@ package cat.eps.movieRecommender;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.NullWritable;
@@ -23,7 +22,9 @@ import cat.eps.movieRecommender.jobControl.JobRunner;
 import cat.eps.movieRecommender.mappers.BestRatedMoviesMapper;
 import cat.eps.movieRecommender.mappers.InputReaderMapper;
 import cat.eps.movieRecommender.mappers.MoviesMapper;
-import cat.eps.movieRecommender.mappers.StatsCalcMapper;
+import cat.eps.movieRecommender.mappers.MoviesStatsCalcMapper;
+import cat.eps.movieRecommender.mappers.UsersMapper;
+import cat.eps.movieRecommender.mappers.UsersStatsCalcMapper;
 import cat.eps.movieRecommender.outputFormat.MovieOutputFormat;
 import cat.eps.movieRecommender.reducers.MoviesReducer;
 import cat.eps.movieRecommender.writable.MovieWritable;
@@ -83,7 +84,7 @@ public class MovieRecommender extends Configured implements Tool {
 		conf.set("minOcurrences", args[3]);
 		Job job3BestRatedMovies = Job.getInstance(conf);
 		job3BestRatedMovies.setJarByClass(MovieRecommender.class);
-		job3BestRatedMovies.setJobName("3.- Top N Movies Mapper");
+		job3BestRatedMovies.setJobName("3.- Top N Movies");
 		job3BestRatedMovies.setMapperClass(BestRatedMoviesMapper.class);
 		job3BestRatedMovies.setInputFormatClass(TextInputFormat.class);
 		job3BestRatedMovies.setOutputFormatClass(MovieOutputFormat.class);
@@ -99,8 +100,8 @@ public class MovieRecommender extends Configured implements Tool {
 		/*******************JOB 4: Stats Calc********************/
 		Job job4StatsCalc = Job.getInstance(conf);
 		job4StatsCalc.setJarByClass(MovieRecommender.class);
-		job4StatsCalc.setJobName("4.- Stats Calc");
-		job4StatsCalc.setMapperClass(StatsCalcMapper.class);
+		job4StatsCalc.setJobName("4.- Movies Stats");
+		job4StatsCalc.setMapperClass(MoviesStatsCalcMapper.class);
 		job4StatsCalc.setInputFormatClass(TextInputFormat.class);
 		job4StatsCalc.setOutputFormatClass(TextOutputFormat.class);
 		job4StatsCalc.setOutputKeyClass(Text.class);
@@ -113,16 +114,53 @@ public class MovieRecommender extends Configured implements Tool {
 		cJob4.setJob(job4StatsCalc);
 		
 		
+		/*******************JOB 5:Users Mapper********************/
+		Job job5UsersMapper = Job.getInstance(conf);
+		job5UsersMapper.setJarByClass(MovieRecommender.class);
+		job5UsersMapper.setJobName("5.- UserMapper");
+		job5UsersMapper.setMapperClass(UsersMapper.class);
+		job5UsersMapper.setInputFormatClass(TextInputFormat.class);
+		job5UsersMapper.setOutputFormatClass(TextOutputFormat.class);
+		job5UsersMapper.setOutputKeyClass(LongWritable.class);
+		job5UsersMapper.setOutputValueClass(Text.class);
+	
+		FileInputFormat.addInputPath(job5UsersMapper,new Path(args[1]+"/tmp/job1/part*"));
+		FileOutputFormat.setOutputPath(job5UsersMapper,new Path(args[1]+"/tmp/job5"));
+
+		ControlledJob cJob5 = new ControlledJob(conf);
+		cJob5.setJob(job5UsersMapper);
+		
+		/*******************JOB 6:Users Stats********************/
+		Job job6UsersStats = Job.getInstance(conf);
+		job6UsersStats.setJarByClass(MovieRecommender.class);
+		job6UsersStats.setJobName("6.- User Stats");
+		job6UsersStats.setMapperClass(UsersStatsCalcMapper.class);
+		job6UsersStats.setInputFormatClass(TextInputFormat.class);
+		job6UsersStats.setOutputFormatClass(TextOutputFormat.class);
+		job6UsersStats.setOutputKeyClass(Text.class);
+		job6UsersStats.setOutputValueClass(Text.class);
+	
+		FileInputFormat.addInputPath(job6UsersStats,new Path(args[1]+"/tmp/job5/part*"));
+		FileOutputFormat.setOutputPath(job6UsersStats,new Path(args[1]+"/job6"));
+
+		ControlledJob cJob6 = new ControlledJob(conf);
+		cJob6.setJob(job6UsersStats);
+		
 		JobControl jobctrl = new JobControl("jobctrl");
 		jobctrl.addJob(cJob1);
 		jobctrl.addJob(cJob2);
 		jobctrl.addJob(cJob3);
 		jobctrl.addJob(cJob4);
+		jobctrl.addJob(cJob5);
+		jobctrl.addJob(cJob6);
 		
 		cJob2.addDependingJob(cJob1);
 		
 		cJob3.addDependingJob(cJob2);
 		cJob4.addDependingJob(cJob2);
+		
+		cJob5.addDependingJob(cJob1);
+		cJob6.addDependingJob(cJob5);
 		
 		Thread jobRunnerThread = new Thread(new JobRunner(jobctrl));
 		jobRunnerThread.start();
@@ -137,9 +175,9 @@ public class MovieRecommender extends Configured implements Tool {
 		jobctrl.stop();
 		System.out.println("Jobs Finished");
 		System.out.println("Cleaning intermediate files...");
-		FileSystem fs = FileSystem.get(conf);
-		fs.delete(new Path(args[1]+"/tmp"), true);
-		fs.close();
+//		FileSystem fs = FileSystem.get(conf);
+//		fs.delete(new Path(args[1]+"/tmp"), true);
+//		fs.close();
 		System.out.println("done");
 
 		return 0;

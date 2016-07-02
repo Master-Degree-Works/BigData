@@ -11,7 +11,7 @@ import org.apache.hadoop.mapreduce.Mapper;
 
 import cat.eps.movieRecommender.writable.MovieWritable;
 
-public class StatsCalcMapper  extends Mapper<LongWritable, Text,Text,Text >
+public class MoviesStatsCalcMapper  extends Mapper<LongWritable, Text,Text,Text >
 {
 
 	private TreeMap<DoubleWritable,MovieWritable> topMovies = new TreeMap<DoubleWritable,MovieWritable>();

@@ -56,7 +56,7 @@ public class MoviesMapper  extends Mapper<LongWritable, Text,LongWritable,Text >
 			Long numberOcurrences = ocurrencesMap.get(movieKey.getMovieId());
 			movieKey.setNumberOfOcurrences(new LongWritable(numberOcurrences));
 			movieKey.setOverallRating(new DoubleWritable((double)overallRating/(double)numberOcurrences));
-			context.write(movieKey.getMovieId(),new Text(movieKey.toString()));
+			context.write(movieKey.getMovieId(),new Text(movieKey.toStringSimple()));
 		}
 	}
 }

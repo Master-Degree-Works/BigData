@@ -1,24 +1,23 @@
 package cat.eps.movieRecommender.mappers;
 
 import java.io.IOException;
-import java.util.Map.Entry;
 import java.util.NavigableSet;
 import java.util.TreeMap;
 
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.LongWritable;
-import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 
 import cat.eps.movieRecommender.writable.MovieWritable;
 
-public class BestRatedMoviesMapper  extends Mapper<LongWritable, Text,NullWritable,MovieWritable >
+public class StatsCalcMapper  extends Mapper<LongWritable, Text,Text,Text >
 {
 
 	private TreeMap<DoubleWritable,MovieWritable> topMovies = new TreeMap<DoubleWritable,MovieWritable>();
 
 	public void map(LongWritable key,Text  value, Context context) throws IOException, InterruptedException {
+
 		String minOcurrencesStr = context.getConfiguration().get("minOcurrences");
 		Integer minOcurrences = new Integer(minOcurrencesStr);
 		
@@ -30,35 +29,34 @@ public class BestRatedMoviesMapper  extends Mapper<LongWritable, Text,NullWritab
 			if(movie.getNumberOfOcurrences().get()>minOcurrences){
 				topMovies.put(new DoubleWritable(movie.getOverallRating().get()),movie);
 			}
-			
 	}
 
 	@Override
 	protected void cleanup(Context context) throws IOException, InterruptedException {
-		String nTop = context.getConfiguration().get("NTop");
-		Integer nTopInt = new Integer(nTop);
-		
-		boolean allItems = (nTopInt ==999);
+		  	
 		NavigableSet<DoubleWritable> nSet = topMovies.descendingKeySet();
 		  
-		int itemCounter=0;
+	
 		
-		TreeMap<DoubleWritable,MovieWritable> resultMap = new TreeMap<DoubleWritable,MovieWritable>();
-		
+		MovieWritable maxOcurrencesMovie= null;
+		double averageRating = 0l;
+		double allRatings = 0l;
+				
 		for (DoubleWritable key: nSet) {
 			MovieWritable movie = topMovies.get(key);
-			if(itemCounter>=nTopInt && !allItems){
-				break;
+			
+			allRatings+=movie.getOverallRating().get();
+			
+			if(maxOcurrencesMovie==null){
+				maxOcurrencesMovie = movie;
+			}else if(maxOcurrencesMovie.getNumberOfOcurrences().get()<movie.getNumberOfOcurrences().get()){
+				maxOcurrencesMovie = movie;
 			}
-
-			resultMap.put(key, movie);
-
-			itemCounter++;
 		}
 		
-		for(Entry<DoubleWritable, MovieWritable> movieResult : resultMap.entrySet()){
-			context.write(NullWritable.get(),movieResult.getValue());
-		}		
-		
+		context.write(new Text("Most times rated Movie"), new Text(maxOcurrencesMovie.toStringSimple()));
+			
+		averageRating=allRatings/topMovies.keySet().size();
+		context.write(new Text("Average Rating"), new Text(String.valueOf(averageRating)));
 	}
 }

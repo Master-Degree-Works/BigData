@@ -217,7 +217,7 @@ public class JsonWritable implements WritableComparable<Object> {
 
 	public LongWritable getTimestamp() {
 		return timestamp;
-	}
+	}
 	public void setTimestamp(LongWritable timestamp) {
 		this.timestamp = timestamp;
 	}
